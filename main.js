@@ -1,9 +1,11 @@
 import * as THREE from './three/src/Three.js';
 import { GLTFLoader } from './three/examples/jsm/loaders/GLTFLoader.js';
 
-import {move} from './2Dmovement.js'
+import {move} from './2Dmovement.js';
 
 var scene, renderer, camera, player;
+
+var map;
 
 init();
 animate();
@@ -34,15 +36,19 @@ function init()
 	var loader = new GLTFLoader();
 
 	loader.load( 'basic_map.glb', function ( gltf ) {
-		scene.add( gltf.scene );
+		map = gltf.scene;
+		scene.add(map);
 	}, undefined, function ( error ) {
 		console.error( error );
 	} );
 
+
 	var geometry = new THREE.BoxGeometry(); 
+	geometry.computeBoundingBox();
 	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); 
 	player = new THREE.Mesh( geometry, material ); 
 	scene.add( player );
+	player.position.set(0,1,0);
 
 
 }
@@ -50,7 +56,7 @@ function init()
 function animate()
 {
 	requestAnimationFrame(animate);
-	move(player);
+	move(player, map);
 	renderer.render( scene, camera );
 }
 

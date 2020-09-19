@@ -1,14 +1,22 @@
 import {Vector3} from './three/src/Three.js';
+import {collisionCheck} from './collision.js';
 
 var prevTime = performance.now();
 var time;
 var velocity = new Vector3();
 var direction = new Vector3();
 
+var deltaX, deltaZ = 0;
+
 var moveUp = false;
 var moveDown = false;
 var moveLeft = false;
 var moveRight = false;
+
+var location;
+var nextLocation;
+
+var collision;
 
 var onKeyDown = function(event)
 {
@@ -50,7 +58,7 @@ var onKeyUp = function(event)
 document.addEventListener( 'keydown', onKeyDown, false );
 document.addEventListener( 'keyup', onKeyUp, false );
 
-export function move(player)
+export function move(player, map)
 {
 	time = performance.now();
 	var delta = (time - prevTime) / 1000;
@@ -65,8 +73,36 @@ export function move(player)
 	if ( moveUp || moveDown ) velocity.z -= direction.z * 400.0 * delta;
 	if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
 
-	player.translateX( - velocity.x * delta );
-	player.translateZ(  velocity.z * delta );
+	deltaX = (- velocity.x * delta);
+	deltaZ = velocity.z * delta;
+
+	console.log("DeltaX: " + deltaX);
+
+	collision = collisionCheck(player, map);
+
+	if(deltaX > collision[0])
+	{
+		deltaX = collision[0] - 0.01;
+		velocity.x = 0;
+	}
+	if(-deltaX > collision[1])
+	{
+		deltaX = 0.01 - collision[1];
+		velocity.x = 0;
+	}
+	if(-deltaZ > collision[2])
+	{
+		deltaZ = 0.01 - collision[2];
+		velocity.z = 0;
+	}
+	if(deltaZ > collision[3])
+	{
+		deltaZ = collision[3] - 0.01;
+		velocity.z = 0;
+	}
+
+	player.translateX(deltaX);
+	player.translateZ(deltaZ);
 
 	prevTime = time;
 }
